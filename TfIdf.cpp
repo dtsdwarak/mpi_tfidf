@@ -6,13 +6,13 @@
 using namespace std;
 
 int main () {
-  
+
   int no_of_files=0;
   vector<string> name_of_files;
   vector<vector<pair<string, int> >> res;
   vector<pair<string, int> > temp;
-  for ( boost::filesystem::recursive_directory_iterator end, dir("/home/admin46/Downloads/datasets/sample");dir != end; ++dir ) {
-    std::cout << dir->path().string() << "\n"; 
+  for ( boost::filesystem::recursive_directory_iterator end, dir("sample");dir != end; ++dir ) {
+    std::cout << dir->path().string() << "\n";
 	temp=getKeywords(dir->path().string());
 	res.push_back(temp);
 	name_of_files.push_back(dir->path().filename().string());
@@ -26,13 +26,13 @@ int main () {
   	}
   }
 
-  
+
   float percent;
   cout<<"what %age of keywords you want to match";
   cin>>percent;
   percent=percent/100;
 
-  
+
   for(int i=0;i<res.size();i++){
   	unordered_map<string,int> findkeys(res[i].begin(),res[i].end());
   	for(int j=i+1;j<res.size();j++){
@@ -47,7 +47,7 @@ int main () {
   		arr[j][i]=count;
   	}
   }
-  
+
 
   for(int i=0;i<no_of_files;i++){
   	for(int j=0;j<no_of_files;j++){
