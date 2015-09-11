@@ -12,11 +12,8 @@ int main () {
   vector<vector<pair<string, int> >> res;
   vector<pair<string, int> > temp;
   for ( boost::filesystem::recursive_directory_iterator end, dir("sample");dir != end; ++dir ) {
-<<<<<<< HEAD
-    std::cout << dir->path().string() << "\n"; 
-=======
     std::cout << dir->path().string() << "\n";
->>>>>>> 68fa29a3b3b0aabb39372fa22bfc1880c192b458
+    std::cout << dir->path().string() << "\n";
 	temp=getKeywords(dir->path().string());
 	res.push_back(temp);
 	name_of_files.push_back(dir->path().filename().string());
