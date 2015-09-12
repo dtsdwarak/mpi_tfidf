@@ -1,4 +1,4 @@
-//-g++ -std=c++11 TfIdf.cpp -lboost_filesystem -lboost_system -lboost_regex
+//-g++ -std=c++11 TfIdf.cpp -lboost_filesystem -lboost_system -lboost_regex -o tfidf
 //#include "mpi.h"
 #include "boost/filesystem.hpp"
 #include <iostream>
@@ -11,15 +11,23 @@ int main () {
   vector<string> name_of_files;
   vector<vector<pair<string, int> >> res;
   vector<pair<string, int> > temp;
-  for ( boost::filesystem::recursive_directory_iterator end, dir("sample");dir != end; ++dir ) {
+  for ( boost::filesystem::recursive_directory_iterator end, dir("dwarak");dir != end; ++dir ) {
     std::cout << dir->path().string() << "\n";
     std::cout << dir->path().string() << "\n";
-	temp=getKeywords(dir->path().string());
-	res.push_back(temp);
-	name_of_files.push_back(dir->path().filename().string());
-	no_of_files++;
+  	temp=getKeywords(dir->path().string());
+  	res.push_back(temp);
+  	name_of_files.push_back(dir->path().filename().string());
+  	no_of_files++;
   }
+  for(int i=0;i<name_of_files.size();i++){
+    cout<<name_of_files[i]<<"\n";
+  }
+
+  exit(0);
+
+
   int count;
+  //Create a matrix for file-to-file comparison
   int arr[no_of_files][no_of_files];
   for(int i=0;i<no_of_files;i++){
   	for(int j=0;j<no_of_files;j++){
@@ -34,6 +42,8 @@ int main () {
   percent=percent/100;
 
 
+
+  //Updating the array with the count
   for(int i=0;i<res.size();i++){
   	unordered_map<string,int> findkeys(res[i].begin(),res[i].end());
   	for(int j=i+1;j<res.size();j++){

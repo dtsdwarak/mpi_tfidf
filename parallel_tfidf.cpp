@@ -66,10 +66,10 @@ int main(int argc, char* argv[])
         //cout<<"\n\n Parent Queue:";
         //cout<<"\n"<<dir+"/"+dirp->d_name<<endl;
 
-        //BoostFileSystem Declaration
-        path file_path(dir+"/"+dirp->d_name);
-        if (is_directory(file_path)) //Push elements into the queue only if they are directories
-        que.push(dir+"/"+string(dirp->d_name));
+        // BoostFileSystem Declaration
+        // path file_path(dir+"/"+dirp->d_name);
+        // if (is_directory(file_path)) //Push elements into the queue only if they are directories
+        que.push(dir+"/"+string(dirp->d_name)); //If only this statement is present, we push all the files into the queue
       }
       closedir(dp);
 
@@ -218,6 +218,10 @@ int main(int argc, char* argv[])
 // FOR SUBORDINATE PROCESSES
   else{
 
+
+  //File Keyword Mapper Table
+  unordered_map<string,vector<pair<string, int> > >  file_keyword_table;
+
   while(1){
         cout<<"\n\n Child"<<pid<<": Waiting for something to happen";
   			queue<string> que2;
@@ -278,6 +282,8 @@ int main(int argc, char* argv[])
             que3.pop();
           }
 
+
+
           while(!que2.empty()){
 
             //cout<<"\n Child : checking for "<<que2.front();
@@ -286,6 +292,27 @@ int main(int argc, char* argv[])
 		        que2.pop();
 		        DIR *dp;
 		        struct dirent *dirp;
+
+
+            // cout<<"\n\n hey there!";
+            // exit(1);
+
+            path file_path(dir2);
+
+            //If the queue element is a file
+            if(!(is_directory(file_path))) {
+              // cout<<"\n dei mandaya!"<<dir2<<" is a file";
+              file_keyword_table.insert(make_pair<string,vector<pair<string, int> > >(string(dir2),getKeywords(dir2)));
+              cout<< "\n Child" << pid << " has entries for :\n";
+              for( auto& x: file_keyword_table){
+                cout<<x.first<<"\n";
+              }
+            }
+
+            //The element in the queue is a directory
+            else {
+
+            //Traversing the directory in the queue
 
 		        if((dp = opendir(dir2.c_str())) == NULL) {
   		        cout << "Error(" << errno << ") opening " << dir2 << endl;
@@ -300,14 +327,16 @@ int main(int argc, char* argv[])
 		          //cout<<dirp->d_name<<endl;
 
               //BoostFileSystem Declaration
-              path file_path(dir2+"/"+string(dirp->d_name));
-              if (is_directory(file_path)) {
+              //path file_path2(dir2+"/"+string(dirp->d_name));
+              //if (is_directory(file_path2)) {
                 //cout<<"\n\nChild"<<pid<<": The file path to be pushed = "<<dir2<<"/"<<dirp->d_name;
-                res+=dir2+"/"+string(dirp->d_name)+";"; //Push elements into the queue only if they are directories
-              }
+                res+=dir2+"/"+string(dirp->d_name)+";"; //Push elements into the queue
+              //}
+
 		        }
 		        closedir(dp);
             //cout<<"\n Child:  I am reaching until this place \n";
+            }
 		    }
 
         //cout<<"\n ***************** CHILD : Value TO BE SENT  : "<<res;
