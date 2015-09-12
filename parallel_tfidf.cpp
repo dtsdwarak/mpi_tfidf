@@ -25,22 +25,21 @@ using namespace boost::filesystem;
 
 int main(int argc, char* argv[])
 {
-  int pid;
-  int no_of_process;
-  int flag=0;
-
-  int no_of_files=0;
-  vector<string> name_of_files;
-  int size;
-
-  //vector<vector<pair<string, int> >> res;
-  //vector<pair<string, int> > temp;
+  int pid; //For rank of current process
+  int no_of_process; //To find the total number of processes
+  int size; //Size of processes to be allocated for each process.
 
   //Initializing the MPI environment
   MPI::Init ( argc, argv );
 
   //Getting the number of processes
   no_of_process = MPI::COMM_WORLD.Get_size();
+  //Handling if run as a single application.
+  if(no_of_process<2){
+    cout<<"\n ERROR: You'll need atleast 2 processes to run this application.\n\n";
+    MPI_Finalize();
+    return 0;
+  }
 
   //Get the process ID
   pid = MPI::COMM_WORLD.Get_rank();
@@ -64,7 +63,8 @@ int main(int argc, char* argv[])
         if(((string)dirp->d_name).compare(".")==0||((string)dirp->d_name).compare("..")==0){
           continue;
         }
-        cout<<"\n"<<dir+"/"+dirp->d_name<<endl;
+        //cout<<"\n\n Parent Queue:";
+        //cout<<"\n"<<dir+"/"+dirp->d_name<<endl;
 
         //BoostFileSystem Declaration
         path file_path(dir+"/"+dirp->d_name);
@@ -79,10 +79,10 @@ int main(int argc, char* argv[])
 
 
         // ======== FUNCTION TO PRINT QUEUE VALUES ========
-        ///*
+
         queue<string> que3;
         que3=que;
-        cout<<"\n\n PARENT : Temporary function to print the values"<<endl;
+        cout<<"\n\n PARENT Queue : "<<endl;
         //Temp function to print the value of the queue
         while(!que3.empty()){
           cout<<que3.front()<<endl;
@@ -103,11 +103,12 @@ int main(int argc, char* argv[])
           size=ceil((float)que.size()/(no_of_process-1));
         }
 
-        cout<<"\n PARENT: Que size ="<<que.size();
-        cout<<"\n\n  PARENT : No of processes total ="<<no_of_process;
-        cout<<"\n PARENT : Size determined by parent = "<<size;
+        //cout<<"\n PARENT: Que size ="<<que.size();
+        //cout<<"\n\n  PARENT : No of processes total ="<<no_of_process;
+        //cout<<"\n PARENT : Size determined by parent = "<<size;
 
-
+        /************* PARENT SENDER PROCESS ***********************/
+        /************* ===================== ***********************/
         while(!que.empty() && i<=no_of_process-1){
             int j=0;
             buf="";
@@ -118,18 +119,19 @@ int main(int argc, char* argv[])
               j++;
             }
 
-            cout<<"\n\n RAW DATA SENT BY PARENT to Child"<<i+1<<": "<<buf;
+            //cout<<"\n\n RAW DATA SENT BY PARENT to Child"<<i+1<<": "<<buf;
 
          // MPI::Comm::Send(const void* buf, int count, MPI::Datatype& datatype, int dest, int tag)
             MPI::COMM_WORLD.Send(buf.c_str(), buf.length(), MPI::CHAR, i+1, i+1);
             i++;
         }
-        //send to process end
+
 
 
         //cout<<"\n\n PARENT: THE Value of i = "<<i;
 
-        //recieve from process
+        /************* PARENT RECEIVER PROCESS ***********************/
+        /************* ======================= ***********************/
         while(i>0){
           cout<<"\n\n Process 0 Waiting to receive from child";
 	        MPI::Status status;
@@ -139,7 +141,7 @@ int main(int argc, char* argv[])
 	        MPI::COMM_WORLD.Probe(MPI::ANY_SOURCE, MPI::ANY_TAG, status);
           // MPI::COMM_WORLD.Probe(1, 1, status);
 
-          cout<<"\n Parent : Child sender process values : \n";
+          //cout<<"\n Parent : Child sender process values : \n";
 
 
 	        int l = status.Get_count(MPI::CHAR);
@@ -147,8 +149,8 @@ int main(int argc, char* argv[])
 	        const auto sender = status.Get_source();
 	        const auto tag = status.Get_tag();
 
-          cout<<"\n Sender : "<<sender;
-          cout<<"\n Tag : "<<tag;
+          //cout<<"\n Sender : "<<sender;
+          //cout<<"\n Tag : "<<tag;
 
 	        // MPI::COMM_WORLD.Recv(buf, l, MPI::CHAR, sender, tag, status);
         //MPI::Comm::Recv(void* buf, int count, MPI::Datatype& datatype, int source, int tag, MPI::Status* status)
@@ -159,11 +161,11 @@ int main(int argc, char* argv[])
 	        vector<string> fnames;
 	        boost::split(fnames, fname, boost::is_any_of(";"));
 
-          cout<<"\n\n PARENT: VALUES RECEIVED FROM CHILD"<<sender<<" THAT ARE PUSHED INTO QUEUE :----------------------\n";
+          //cout<<"\n\n PARENT: VALUES RECEIVED FROM CHILD"<<sender<<" THAT ARE PUSHED INTO QUEUE :----------------------\n";
           //cout<<"\n RECEIVED VECTOR SIZE : "<<fnames.size();
 
 	        for(int k=0;k<fnames.size();k++){
-	          cout<<"\n"<<fnames[k];
+	          //cout<<"\n"<<fnames[k];
             if(fnames[k].length())
             que.push(fnames[k]);
 	        }
@@ -174,20 +176,27 @@ int main(int argc, char* argv[])
         // name_of_files.push_back(dir->path().filename().string());
         // no_of_files++;
 
-        cout<<"\n ################### PARENT : after pushing received values, queue size =  "<<que.size();
-        que3=que;
-        cout<<"\n\n################### PARENT : after pushing received values,Temporary function to print the values"<<endl;
+        //cout<<"\n ################### PARENT : after pushing received values, queue size =  "<<que.size();
+
+        //cout<<"\n\n################### PARENT : after pushing received values,Temporary function to print the values"<<endl;
         //Temp function to print the value of the queue
+
+        /*
         que3=que;
         while(!que3.empty()){
           cout<<que3.front()<<endl;
           que3.pop();
         }
-        cout<<"\n ################### PARENT : value of i after pushing received values = "<<i;
+
+        */
+
+        // cout<<"\n ################### PARENT : value of i after pushing received values = "<<i;
 
       }
 
-      //If there's nothing to send, abort all the MPI Processes
+
+      /************* IF QUEUE EMPTY, SEND QUIT MESSAGE TO SLAVES ***********************/
+      /************* =========================================== ***********************/
       if(que.empty()){
         //MPI::COMM_WORLD.Abort(2);
         // MPI_Finalize();
@@ -197,13 +206,13 @@ int main(int argc, char* argv[])
           //MPI::Comm::Send(const void* buf, int count, MPI::Datatype& datatype, int dest, int tag)
           MPI::COMM_WORLD.Send(exit_message.c_str(), exit_message.length(), MPI::CHAR, rank_values, rank_values);
         }
-        cout<<"\n\n\n\n\n $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ SERIOUSLY NOTHING TO SEND, SO QUITTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+        cout<<"\n\n\n\n\n $$$$$$$$$$$$$$$$$$$$$$$$$$ PARENT: QUEUE EMPTY. BUBYE!\n ";
         MPI_Finalize();
         return 0;
       }
 
 
-    }
+    } //END OF PROCESS 0
 
 
 // FOR SUBORDINATE PROCESSES
@@ -229,8 +238,7 @@ int main(int argc, char* argv[])
 
           //Exit if parent sends EXIT NOW Message
           if(fname2.compare("EXIT NOW")==0){
-            cout<<"\n\n ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ CHILD"<<pid<<": COMPARE WORKING YEAH!";
-            cout<<"\n Parent says to quit. Exiting Now";
+            cout<<"\n\n ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ CHILD"<<pid<<" QUITTING NOW.\n";
             MPI_Finalize();
             return 0;
             // exit(1);
@@ -251,13 +259,24 @@ int main(int argc, char* argv[])
           //cout<<"\nChild: NUMBER OF VALUES I GOT FROM PARENT : "<<fnames2.size();
 
 	        for(int i=0;i<fnames2.size();i++){
-            cout<<"\n"<<fnames2[i];
+            //cout<<"\n"<<fnames2[i];
 	          if(fnames2[i].length())
             que2.push(fnames2[i]);
 	        }
   		  //recieve from parent end
 
           //cout<<"\n\n Child:  After pushing, the queue size is : "<<que2.size();
+
+
+          //TEMPORARY FUNCTION TO PRINT QUEUE VALUES
+          queue<string> que3;
+          que3=que2;
+          cout<<"\n\n CHILD"<<pid<<" Queue : "<<endl;
+          //Temp function to print the value of the queue
+          while(!que3.empty()){
+            cout<<que3.front()<<endl;
+            que3.pop();
+          }
 
           while(!que2.empty()){
 
@@ -283,7 +302,7 @@ int main(int argc, char* argv[])
               //BoostFileSystem Declaration
               path file_path(dir2+"/"+string(dirp->d_name));
               if (is_directory(file_path)) {
-                cout<<"\n\nChild"<<pid<<": The file path to be pushed = "<<dir2<<"/"<<dirp->d_name;
+                //cout<<"\n\nChild"<<pid<<": The file path to be pushed = "<<dir2<<"/"<<dirp->d_name;
                 res+=dir2+"/"+string(dirp->d_name)+";"; //Push elements into the queue only if they are directories
               }
 		        }
