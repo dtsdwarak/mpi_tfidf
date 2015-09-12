@@ -15,7 +15,7 @@
 using namespace std;
 
 vector<pair<string, int> > getKeywords(string filename){
-	
+
 	string line,input_text="";
   	ifstream myfile (filename);
   	if (myfile.is_open())
@@ -24,7 +24,7 @@ vector<pair<string, int> > getKeywords(string filename){
     		{
 			line = boost::regex_replace(line, boost::regex {"[^'a-zA-Z]"}, std::string {" "});
     			line = boost::regex_replace(line, boost::regex {"[ \r\n\t]+"}, std::string {" "});
-    			transform(line.begin(), line.end(), line.begin(), ::tolower);     			
+    			transform(line.begin(), line.end(), line.begin(), ::tolower);
 			input_text+=line+" ";
     		}
     		myfile.close();
@@ -73,7 +73,7 @@ vector<pair<string, int> > getKeywords(string filename){
     } sort_keywords_desc;
 
     sort(found_keywords_sort.begin(), found_keywords_sort.end(), sort_keywords_desc);
-	
+
     for(int i=0;i<found_keywords_sort.size();i++){
         cout<<found_keywords_sort[i].first<<" "<<found_keywords_sort[i].second<<endl;
     }
@@ -81,4 +81,3 @@ vector<pair<string, int> > getKeywords(string filename){
     return found_keywords_sort;
 
 }
-
