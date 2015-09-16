@@ -21,6 +21,7 @@
 #include <cctype>
 #include <cmath>
 #include <cstring>
+#include <ctime>
 #include <cstdlib>
 #include <limits>
 #include <set>
@@ -56,6 +57,9 @@ int main(int argc, char* argv[])
 
   //Get the process ID
   pid = MPI::COMM_WORLD.Get_rank();
+
+  //Taking the Time value
+  clock_t time_value = clock();
 
   // Process ID 0 => Initial Process
   if(pid==0){
@@ -225,6 +229,8 @@ int main(int argc, char* argv[])
         MPI::COMM_WORLD.Recv(&val_recv, 1, MPI::INT, sender, tag, status);
       }
 
+      cout<<"\n\n Time taken to process data = "<<float(clock()-time_value)/CLOCKS_PER_SEC<<" seconds";
+
       while(1){
 
         int choice;
@@ -239,13 +245,15 @@ int main(int argc, char* argv[])
           case 1: cout<<"\n Enter the file name : ";
                   cin.getline(whatfile,400);
                   task_message=string(whatfile,strlen(whatfile))+";Related Files";
-                  cout<<"\n"<<task_message;
+                  // cout<<"\n"<<task_message;
+                  time_value=clock();
                   break;
           case 2: cout<<"\n Enter the file name you wish to find the transitive closure for : ";
                   cin.getline(whatfile,400);
                   task_message=string(whatfile,strlen(whatfile))+";Transitive Closure;Just Tell";
                   queue_values.insert(whatfile);
                   vec_queue_values.push_back(whatfile);
+                  time_value=clock();
                   break;
           case 3: task_message="EXIT NOW";
 
@@ -263,7 +271,7 @@ int main(int argc, char* argv[])
         }
 
         else if (choice==2){
-          
+
           int send_flag=1;
 
 
@@ -291,7 +299,7 @@ int main(int argc, char* argv[])
             //MPI::Comm::Recv(void* buf, int count, MPI::Datatype& datatype, int source, int tag, MPI::Status* status)
             // cout<<"\n\n Parent waiting to receive!\n\n ";
             MPI::COMM_WORLD.Recv(char_value, char_length, MPI::CHAR, sender, tag, status);
-          
+
           }
 
 
@@ -310,13 +318,13 @@ int main(int argc, char* argv[])
           for(int i=0;i<recd_file_vector.size();i++){
 
             if(recd_file_vector[i].length()){
-              
+
               if(queue_values.find(recd_file_vector[i])==queue_values.end()){
                 send_flag=1;
                 queue_values.insert(recd_file_vector[i]);
                 vec_queue_values.push_back(recd_file_vector[i]);
                 send_string_val += recd_file_vector[i] + ";";
-              
+
               }
             }
           }
@@ -325,13 +333,14 @@ int main(int argc, char* argv[])
 
           if(send_flag){
 
-            for(int rank_values=1;rank_values<no_of_process;rank_values++){  
+            for(int rank_values=1;rank_values<no_of_process;rank_values++){
               // cout<<"\n\n Sending value to "<<rank_values;
                MPI::COMM_WORLD.Send(send_string_val.c_str(), send_string_val.length(), MPI::CHAR, rank_values, rank_values);
             }
           }
 
           else{
+            cout<<"\n\n Time taken to find transitive closure = "<<float(clock()-time_value)/CLOCKS_PER_SEC<<" seconds";
             cout<<"\n\n Connected File Names : \n";
             queue_values.erase(whatfile);
             for(auto x: queue_values){
@@ -355,8 +364,7 @@ int main(int argc, char* argv[])
           //MPI::Comm::Recv(void* buf, int count, MPI::Datatype& datatype, int source, int tag, MPI::Status* status)
           // cout<<"\n\n Parent waiting to receive!\n\n ";
           MPI::COMM_WORLD.Recv(&val_recv, 1, MPI::INT, sender, tag, status);
-          // cout<<"\n Parent received!";
-        }
+          cout<<"\n\n Time taken to find related files = "<<float(clock()-time_value)/CLOCKS_PER_SEC<<" seconds";        }
 
       } // End of While Loop
 
@@ -410,11 +418,11 @@ int main(int argc, char* argv[])
             if(fname2.find("Transitive Closure;Just Tell")!=string::npos){
 
               string act_file_name = fname2.substr(0, fname2.find(';'));
-              
+
               string send_file_string = "";
 
               if(file_keyword_table.find(act_file_name)!=file_keyword_table.end()){
-                
+
                 for(auto p: similarity_matrix ){
                   if(p.first.first.compare(act_file_name)==0 && p.second!=0 ){
                     send_file_string += p.first.second + ";";
@@ -424,7 +432,7 @@ int main(int argc, char* argv[])
                 MPI::COMM_WORLD.Send(send_file_string.c_str(), send_file_string.length(), MPI::CHAR, 0, pid);
 
               }
-            
+
             }
 
             else if(fname2.find("Transitive Closure;Find One")!=string::npos){
@@ -446,7 +454,7 @@ int main(int argc, char* argv[])
                   }
 
                   MPI::COMM_WORLD.Send(send_file_string.c_str(), send_file_string.length(), MPI::CHAR, 0, pid);
-                
+
                 }
 
               }
@@ -460,7 +468,6 @@ int main(int argc, char* argv[])
           //If Related Files is asked for
           if(fname2.find("Related Files")!=string::npos){
             string act_file_name = fname2.substr(0, fname2.find(';'));
-
             if(file_keyword_table.find(act_file_name)!=file_keyword_table.end()){
               cout<<"\n\n Related Files retrieved by "<<pid<<"\n";
               for(auto it : similarity_matrix){
