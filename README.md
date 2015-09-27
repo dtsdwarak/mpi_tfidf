@@ -1,12 +1,13 @@
 #mpi_tfidf
 
-MPI Assignment
+#What?!
 
+Parallel computation of distributed in-memory graph for text documents across multiple nodes using [MPI](https://en.wikipedia.org/wiki/Message_Passing_Interface). More on what has been done [here](http://csis.bits-pilani.ac.in/faculty/sundarb/courses/cloud/eval/assign1.html).
 
 ##Dependencies
 
-* ```libboost-all-dev```
-* set ```export LD_LIBRARY_PATH="/usr/lib/boost/lib"```
+* C++ Boost library - ```libboost-all-dev```
+* set environment variable ```export LD_LIBRARY_PATH="/usr/lib/boost/lib"```
 * ```mpich2```(3.1.4)
 * ```g++```
 
