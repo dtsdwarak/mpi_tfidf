@@ -1,10 +1,10 @@
-#mpi_tfidf
+# mpi_tfidf
 
-#What?!
+# What?!
 
 Parallel computation of distributed in-memory graph for text documents across multiple nodes using [MPI](https://en.wikipedia.org/wiki/Message_Passing_Interface). More on what has been done [here](http://csis.bits-pilani.ac.in/faculty/sundarb/courses/cloud/eval/assign1.html).
 
-##Dependencies
+## Dependencies
 
 * C++ Boost library - ```libboost-all-dev```
 * set environment variable ```export LD_LIBRARY_PATH="/usr/lib/boost/lib"```
@@ -12,6 +12,6 @@ Parallel computation of distributed in-memory graph for text documents across mu
 * ```g++```
 
 
-##Documentation
+## Documentation
 
 * ```dirent.h```- [http://pubs.opengroup.org/onlinepubs/007908775/xsh/dirent.h.html](http://pubs.opengroup.org/onlinepubs/007908775/xsh/dirent.h.html)
